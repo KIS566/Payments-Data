@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Payment Report</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary: #4361ee;
+      --secondary: #3f37c9;
+      --success: #4cc9f0;
+      --light: #f8f9fa;
+      --dark: #212529;
+      --gray: #6c757d;
+      --border: #dee2e6;
+      --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      --transition: all 0.3s ease;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      color: var(--dark);
+      line-height: 1.6;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    header {
+      text-align: center;
+      margin-bottom: 30px;
+      animation: fadeIn 1s ease;
+    }
+    
+    h1 {
+      color: var(--primary);
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+      position: relative;
+      display: inline-block;
+    }
+    
+    h1::after {
+      content: '';
+      position: absolute;
+      bottom: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100px;
+      height: 4px;
+      background: var(--success);
+      border-radius: 2px;
+    }
+    
+    .subtitle {
+      color: var(--gray);
+      font-size: 1.1rem;
+    }
+    
+    .stats-container {
+      display: flex;
+      justify-content: space-around;
+      flex-wrap: wrap;
+      margin-bottom: 30px;
+      gap: 20px;
+    }
+    
+    .stat-card {
+      background: white;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: var(--shadow);
+      text-align: center;
+      flex: 1;
+      min-width: 200px;
+      transition: var(--transition);
+      animation: slideUp 0.8s ease;
+    }
+    
+    .stat-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    .stat-card i {
+      font-size: 2.5rem;
+      color: var(--primary);
+      margin-bottom: 10px;
+    }
+    
+    .stat-number {
+      font-size: 2rem;
+      font-weight: bold;
+      color: var(--secondary);
+      margin: 10px 0;
+    }
+    
+    .stat-label {
+      color: var(--gray);
+      font-size: 0.9rem;
+    }
+    
+    .table-container {
+      background: white;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      animation: fadeIn 1.2s ease;
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    
+    thead {
+      background: linear-gradient(to right, var(--primary), var(--secondary));
+      color: white;
+    }
+    
+    th {
+      padding: 15px;
+      text-align: left;
+      font-weight: 600;
+      position: relative;
+    }
+    
+    th::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: var(--success);
+    }
+    
+    tbody tr {
+      transition: var(--transition);
+    }
+    
+    tbody tr:nth-child(even) {
+      background-color: rgba(0, 0, 0, 0.02);
+    }
+    
+    tbody tr:hover {
+      background-color: rgba(67, 97, 238, 0.05);
+      transform: scale(1.01);
+    }
+    
+    td {
+      padding: 12px 15px;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: var(--gray);
+    }
+    
+    .loading i {
+      font-size: 2rem;
+      margin-bottom: 15px;
+      color: var(--primary);
+      animation: spin 1.5s linear infinite;
+    }
+    
+    .error {
+      text-align: center;
+      padding: 40px;
+      color: #e74c3c;
+    }
+    
+    .error i {
+      font-size: 3rem;
+      margin-bottom: 15px;
+    }
+    
+    .controls {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+    
+    .search-box {
+      position: relative;
+      flex: 1;
+      min-width: 250px;
+    }
+    
+    .search-box input {
+      width: 100%;
+      padding: 12px 15px 12px 40px;
+      border: 1px solid var(--border);
+      border-radius: 30px;
+      font-size: 1rem;
+      transition: var(--transition);
+    }
+    
+    .search-box input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+    }
+    
+    .search-box i {
+      position: absolute;
+      left: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--gray);
+    }
+    
+    .filter-options {
+      display: flex;
+      gap: 10px;
+    }
+    
+    .filter-btn {
+      padding: 10px 15px;
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    
+    .filter-btn:hover {
+      background: var(--light);
+    }
+    
+    .filter-btn.active {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+    
+    footer {
+      text-align: center;
+      margin-top: 30px;
+      color: var(--gray);
+      font-size: 0.9rem;
+      padding: 20px;
+    }
+    
+    /* Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    @keyframes slideUp {
+      from { 
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to { 
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+      .stats-container {
+        flex-direction: column;
+      }
+      
+      th, td {
+        padding: 10px;
+      }
+      
+      .controls {
+        flex-direction: column;
+      }
+      
+      h1 {
+        font-size: 2rem;
+      }
+    }
+    
+    @media (max-width: 576px) {
+      body {
+        padding: 10px;
+      }
+      
+      th, td {
+        padding: 8px 5px;
+        font-size: 0.9rem;
+      }
+      
+      thead {
+        display: none;
+      }
+      
+      tbody tr {
+        display: block;
+        margin-bottom: 15px;
+        border: 1px solid var(--border);
+        border-radius: 5px;
+        padding: 10px;
+      }
+      
+      tbody td {
+        display: flex;
+        justify-content: space-between;
+        border: none;
+        padding: 5px 0;
+      }
+      
+      tbody td::before {
+        content: attr(data-label);
+        font-weight: bold;
+        text-transform: uppercase;
+        color: var(--primary);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1><i class="fas fa-file-invoice-dollar"></i> Payment Report</h1>
+      <p class="subtitle">Registered & Paid Users Information</p>
+    </header>
+    
+    <div class="stats-container">
+      <div class="stat-card">
+        <i class="fas fa-users"></i>
+        <div class="stat-number" id="totalUsers">0</div>
+        <div class="stat-label">Total Users</div>
+      </div>
+      
+      <div class="stat-card">
+        <i class="fas fa-calendar-check"></i>
+        <div class="stat-number" id="todayUsers">0</div>
+        <div class="stat-label">Registered Today</div>
+      </div>
+      
+      <div class="stat-card">
+        <i class="fas fa-chart-line"></i>
+        <div class="stat-number" id="activeUsers">0</div>
+        <div class="stat-label">Active This Week</div>
+      </div>
+    </div>
+    
+    <div class="controls">
+      <div class="search-box">
+        <i class="fas fa-search"></i>
+        <input type="text" id="searchInput" placeholder="Search users...">
+      </div>
+      
+      <div class="filter-options">
+        <button class="filter-btn active" data-filter="all">
+          <i class="fas fa-list"></i> All
+        </button>
+        <button class="filter-btn" data-filter="recent">
+          <i class="fas fa-clock"></i> Recent
+        </button>
+        <button class="filter-btn" data-filter="class">
+          <i class="fas fa-graduation-cap"></i> By Class
+        </button>
+      </div>
+    </div>
+    
+    <div class="table-container">
+      <table id="userTable">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Roll</th>
+            <th>Class</th>
+            <th>Phone</th>
+            <th>Timestamp</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="loading-row">
+            <td colspan="5">
+              <div class="loading">
+                <i class="fas fa-spinner"></i>
+                <p>Loading payment data...</p>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    
+    <footer>
+      <p>Payment Report System &copy; 2023 | Last updated: <span id="lastUpdate"></span></p>
+    </footer>
+  </div>
+
+  <script>
+    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzRYhVL4bpO_nckaYe2_bII7-2xHgQIGlBXVNwvcpHx-SIx1G9-jq36A9ydRqrSRuqH/exec";
+    let userData = [];
+    
+    // Format date for display
+    function formatDate(dateString) {
+      const options = { 
+        year: 'numeric', 
+        month: 'short', 
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      };
+      return new Date(dateString).toLocaleDateString('hi-IN', options);
+    }
+    
+    // Update last updated timestamp
+    document.getElementById('lastUpdate').textContent = new Date().toLocaleString('hi-IN');
+    
+    // Fetch data from Google Apps Script
+    fetch(APPS_SCRIPT_URL + "?read=true")
+      .then(res => res.json())
+      .then(data => {
+        userData = data;
+        renderTable(userData);
+        updateStats(userData);
+        
+        // Remove loading row
+        document.querySelector('.loading-row').remove();
+      })
+      .catch(err => {
+        console.error("Error fetching report:", err);
+        const tbody = document.querySelector("#userTable tbody");
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="5">
+              <div class="error">
+                <i class="fas fa-exclamation-triangle"></i>
+                <p>Error loading data. Please try again later.</p>
+              </div>
+            </td>
+          </tr>
+        `;
+      });
+    
+    // Render table with data
+    function renderTable(data) {
+      const tbody = document.querySelector("#userTable tbody");
+      tbody.innerHTML = '';
+      
+      if (data.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="5" style="text-align: center; padding: 30px;">
+              <i class="fas fa-inbox" style="font-size: 3rem; color: #ccc; margin-bottom: 10px;"></i>
+              <p>No data available</p>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+      
+      data.forEach((row, index) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td data-label="Name">${row.name || 'N/A'}</td>
+          <td data-label="Roll">${row.roll || 'N/A'}</td>
+          <td data-label="Class">${row.class || 'N/A'}</td>
+          <td data-label="Phone">${row.phone || 'N/A'}</td>
+          <td data-label="Timestamp">${formatDate(row.timestamp) || 'N/A'}</td>
+        `;
+        
+        // Add animation delay for staggered effect
+        tr.style.animationDelay = `${index * 0.05}s`;
+        tr.classList.add('animate-row');
+        
+        tbody.appendChild(tr);
+      });
+    }
+    
+    // Update statistics cards
+    function updateStats(data) {
+      // Total users
+      document.getElementById('totalUsers').textContent = data.length;
+      
+      // Users registered today
+      const today = new Date().toDateString();
+      const todayUsers = data.filter(user => {
+        const userDate = new Date(user.timestamp).toDateString();
+        return userDate === today;
+      }).length;
+      document.getElementById('todayUsers').textContent = todayUsers;
+      
+      // Users active this week (last 7 days)
+      const weekAgo = new Date();
+      weekAgo.setDate(weekAgo.getDate() - 7);
+      const activeUsers = data.filter(user => {
+        const userDate = new Date(user.timestamp);
+        return userDate >= weekAgo;
+      }).length;
+      document.getElementById('activeUsers').textContent = activeUsers;
+      
+      // Animate the numbers
+      animateValue('totalUsers', 0, data.length, 1000);
+      animateValue('todayUsers', 0, todayUsers, 1000);
+      animateValue('activeUsers', 0, activeUsers, 1000);
+    }
+    
+    // Animate number counting
+    function animateValue(id, start, end, duration) {
+      const obj = document.getElementById(id);
+      let startTimestamp = null;
+      const step = (timestamp) => {
+        if (!startTimestamp) startTimestamp = timestamp;
+        const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+        obj.innerHTML = Math.floor(progress * (end - start) + start);
+        if (progress < 1) {
+          window.requestAnimationFrame(step);
+        }
+      };
+      window.requestAnimationFrame(step);
+    }
+    
+    // Search functionality
+    document.getElementById('searchInput').addEventListener('input', function(e) {
+      const searchTerm = e.target.value.toLowerCase();
+      const filteredData = userData.filter(user => 
+        user.name.toLowerCase().includes(searchTerm) ||
+        user.roll.toLowerCase().includes(searchTerm) ||
+        user.class.toLowerCase().includes(searchTerm) ||
+        user.phone.toLowerCase().includes(searchTerm)
+      );
+      renderTable(filteredData);
+    });
+    
+    // Filter functionality
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        // Remove active class from all buttons
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        // Add active class to clicked button
+        this.classList.add('active');
+        
+        const filter = this.getAttribute('data-filter');
+        let filteredData = [...userData];
+        
+        switch(filter) {
+          case 'recent':
+            // Show only last 7 days
+            const weekAgo = new Date();
+            weekAgo.setDate(weekAgo.getDate() - 7);
+            filteredData = userData.filter(user => {
+              const userDate = new Date(user.timestamp);
+              return userDate >= weekAgo;
+            });
+            break;
+          case 'class':
+            // Sort by class
+            filteredData.sort((a, b) => a.class.localeCompare(b.class));
+            break;
+          // 'all' filter shows all data without changes
+        }
+        
+        renderTable(filteredData);
+      });
+    });
+    
+    // Add CSS for row animations
+    const style = document.createElement('style');
+    style.textContent = `
+      .animate-row {
+        animation: slideUp 0.5s ease forwards;
+        opacity: 0;
+      }
+    `;
+    document.head.appendChild(style);
+  </script>
+</body>
+</html>
